@@ -1,11 +1,15 @@
+import fs from 'fs';
 
-var hamsterNode = '234ee9a8c9dadd2c2603d64f3a0f5119ebff2bec16550a76ba9f74b0c04f9054'
+const PATH = './db.json';
+const db = JSON.parse(fs.readFileSync(PATH));
 
 
-const URL = 'https://ssv-api.ssv.network/api/v1/operators/prater/';
-    fetch(URL+hamsterNode)
+//Out status of all nodes
+db.forEach(element => {
+    const URL = 'https://ssv-api.ssv.network/api/v1/operators/prater/'+element['nodeAddres'];
+    fetch(URL)
     .then(res => res.json())
-    .then(text => {
-        console.log(text['status'])
-    })
-
+    .then(nodeData => {
+        console.log(`Status of ${element['id']} node is ${nodeData['status']}`)
+    });
+});
