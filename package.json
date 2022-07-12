@@ -2,11 +2,16 @@
   "name": "ssv_bot",
   "version": "1.0.0",
   "description": "Telegram bot which will send a status of ssv node",
-  "main": "app.js",
+  "main": "Bot/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev":"nodemon index.js",
+    "start": "node index.js"
   },
   "author": "oflaned",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.58.0",
+    "nodemon": "^2.0.19"
+  }
 }
