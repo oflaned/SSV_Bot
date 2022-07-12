@@ -1,15 +1,8 @@
 import fs from 'fs';
+import { checkAllNodes } from './functions.js';
 
-const PATH = './db.json';
+const PATH = './data/db.json';
 const db = JSON.parse(fs.readFileSync(PATH));
+console.log('Successful database load');
 
-
-//Out status of all nodes
-db.forEach(element => {
-    const URL = 'https://ssv-api.ssv.network/api/v1/operators/prater/'+element['nodeAddres'];
-    fetch(URL)
-    .then(res => res.json())
-    .then(nodeData => {
-        console.log(`Status of ${element['id']} node is ${nodeData['status']}`)
-    });
-});
+checkAllNodes(db)
