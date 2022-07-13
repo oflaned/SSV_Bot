@@ -1,7 +1,3 @@
-/*
-    print status of all nodes in console
-    arrayOfNodes - array that stores user id and node addresses
-*/
 var checkAllNodes = function(arrayOfNodes) {
     arrayOfNodes.forEach(element => {
         let URL = 'https://ssv-api.ssv.network/api/v1/operators/prater/'+element['nodeAddres'];

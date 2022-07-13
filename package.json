@@ -4,11 +4,14 @@
   "description": "Telegram bot which will send a status of ssv node",
   "main": "app.js",
   "scripts": {
-    "start": "app.js"
+    "start": "node app.js"
   },
   "author": {
     "name": "Misha and Max"
   },
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "mongoose": "^6.4.4"
+  }
 }
