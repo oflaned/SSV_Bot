@@ -7,7 +7,7 @@
     "start": "node app.js"
   },
   "author": {
-    "name": "Misha and Max"
+    "name": "Misha"
   },
   "license": "ISC",
   "type": "module",

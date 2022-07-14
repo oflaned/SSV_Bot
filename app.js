@@ -1,17 +1,14 @@
-// Нужно вынести данные подключений в конфиг
-import { checkAllNodes, checkCurrentNode } from './functions.js';
+import { checkAllNodes } from './check.js'
 import mongoose from 'mongoose'
+import dbURL from './config/config.js'
 
-
-mongoose.connect("mongodb+srv://oflaned:ILUzus62@cluster0.uf7isx9.mongodb.net/First?retryWrites=true&w=majority", {
+var time = Date.now()
+await mongoose.connect(dbURL, {
         useNewUrlParser: true,
         useUnifiedTopology: true
     })  
-    .then((res) => console.log('connected to monga DB'))
-    .catch((error) => console.log(error))
+    .then( res => console.log('Connected to DB'))
+    .catch( error => console.log(error))
+console.log(`Time to connect with DB: ${(Date.now() - time)/1000} sec.`)
 
-const PATH = './data/db.json';
-const db = JSON.parse(fs.readFileSync(PATH));
-console.log('Successful database load');
-
-await setInterval(checkAllNodes, 30000, db)
+setInterval(checkAllNodes, 10000)
