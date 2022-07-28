@@ -1,9 +1,12 @@
 import { checkAllNodes } from './check.js'
 import mongoose from 'mongoose'
-import dbURL from './config/config.js'
+import dot from 'dotenv'
+import { start } from './bot.js'
 
+dot.config()
 var time = Date.now()
-await mongoose.connect(dbURL, {
+
+await mongoose.connect(process.env.DB_URL, {
         useNewUrlParser: true,
         useUnifiedTopology: true
     })  
@@ -11,4 +14,5 @@ await mongoose.connect(dbURL, {
     .catch( error => console.log(error))
 console.log(`Time to connect with DB: ${(Date.now() - time)/1000} sec.`)
 
-setInterval(checkAllNodes, 10000)
+start()
+setInterval(checkAllNodes, 6000)
