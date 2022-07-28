@@ -4,9 +4,20 @@
   "description": "Telegram bot which will send a status of ssv node",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon app.js",
+    "start": "node app.js"
   },
-  "author": "oflaned",
+  "author": {
+    "name": "oflaned <misha122000@icloud.com>"
+  },
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "mongoose": "^6.4.4",
+    "node-telegram-bot-api": "^0.58.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
+  }
 }

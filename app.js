@@ -1,11 +1,18 @@
+import { checkAllNodes } from './check.js'
+import mongoose from 'mongoose'
+import dot from 'dotenv'
+import { start } from './bot.js'
 
-var hamsterNode = '234ee9a8c9dadd2c2603d64f3a0f5119ebff2bec16550a76ba9f74b0c04f9054'
+dot.config()
+var time = Date.now()
 
+await mongoose.connect(process.env.DB_URL, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+    })  
+    .then( res => console.log('Connected to DB'))
+    .catch( error => console.log(error))
+console.log(`Time to connect with DB: ${(Date.now() - time)/1000} sec.`)
 
-const URL = 'https://ssv-api.ssv.network/api/v1/operators/prater/';
-    fetch(URL+hamsterNode)
-    .then(res => res.json())
-    .then(text => {
-        console.log(text['status'])
-    })
-
+start()
+setInterval(checkAllNodes, 6000)
