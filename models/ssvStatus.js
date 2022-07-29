@@ -7,5 +7,4 @@ const ssvStatusSchema = new Schema({
     status: { type: String, default: "Inactive" }
 })
 
-const ssvStatus = mongoose.model('ssvStatus', ssvStatusSchema)
-export default ssvStatus
+export const ssvStatus = mongoose.model('ssvStatus', ssvStatusSchema)

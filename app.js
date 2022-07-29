@@ -15,4 +15,4 @@ await mongoose.connect(process.env.DB_URL, {
 console.log(`Time to connect with DB: ${(Date.now() - time)/1000} sec.`)
 
 start()
-setInterval(checkAllNodes, 6000)
+setInterval(checkAllNodes, 15000)
