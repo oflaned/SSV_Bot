@@ -1,8 +1,8 @@
-import ssvStatus from './models/ssvStatus.js'
+import { ssvStatus } from './models/ssvStatus.js'
 import { alertNode } from './bot.js'
 
 
-function sendRequest(url) {
+export function sendRequest(url) {
 
     return fetch(url).then(response => {
         if (response.ok) {
@@ -18,15 +18,15 @@ function sendRequest(url) {
 }
 
 
-function checkAllNodes() {
+export function checkAllNodes() {
 
-    ssvStatus.find(function(err, arrayOfNodes) {
-        if(err) throw err;
+    ssvStatus.find(async (err, arrayOfNodes) => {
+        if(err) return console.log(err);
 
-        arrayOfNodes.forEach(async node => {
+        arrayOfNodes.forEach(node => {
             let currentURL = process.env.SSV_URL + node['address']
             sendRequest(currentURL).then(actulNodeInfo => {
-                console.log(`Status of ${node['chatId']} node is ${actulNodeInfo['status']}`)
+                console.log(`Status of ${node['address']} node is ${actulNodeInfo['status']}`)
                 if (node['status'] != actulNodeInfo['status']) { 
                     ssvStatus.updateOne({address: node['address'] }, {status: actulNodeInfo['status']}, (err, res) => { if(err) throw err })
                     alertNode(node['chatId'], actulNodeInfo['status'], node['address'])
@@ -36,5 +36,3 @@ function checkAllNodes() {
     
     })
 }
-
-export { checkAllNodes, sendRequest };
