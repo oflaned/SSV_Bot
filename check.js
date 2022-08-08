@@ -1,38 +1,57 @@
 import { ssvStatus } from './models/ssvStatus.js'
 import { alertNode } from './bot.js'
+import fetch from 'node-fetch'
 
 
 export function sendRequest(url) {
-
     return fetch(url).then(response => {
-        if (response.ok) {
+        if (response.ok) 
             return response.json()
-        }
 
         return response.json().then(error => {
             const e = new Error('something went wrong')
             e.data = error
             throw e
-            })
+        })
     })
 }
 
 
-export function checkAllNodes() {
+export async function checkAllNodes() {
+    let db
+    try {
+        db = await ssvStatus.find()
+    } catch(err) {
+        console.error(err)
+        err.msg = 'Error while reading db'
+        throw err
+    }
 
-    ssvStatus.find(async (err, arrayOfNodes) => {
-        if(err) return console.log(err);
-
-        arrayOfNodes.forEach(node => {
-            let currentURL = process.env.SSV_URL + node['address']
-            sendRequest(currentURL).then(actulNodeInfo => {
-                console.log(`Status of ${node['address']} node is ${actulNodeInfo['status']}`)
-                if (node['status'] != actulNodeInfo['status']) { 
-                    ssvStatus.updateOne({address: node['address'] }, {status: actulNodeInfo['status']}, (err, res) => { if(err) throw err })
-                    alertNode(node['chatId'], actulNodeInfo['status'], node['address'])
-                }
-            }).catch(err => console.log(err))
-        })
     
+    db.forEach(async node => {
+        let currentURL = process.env.SSV_URL + node['address']
+        let res
+        try{
+            res = await fetch(currentURL)
+            if (res.ok){
+                res = await res.json()
+            }
+            else {
+                throw 'Error while get data from ssv API'
+            }
+        } catch(err){
+            console.error(err)
+            return err
+        }
+
+        console.log(`Status of ${node['address']} node is ${res['status']}`)
+    
+        if (node['status'] !== res['status']) { 
+            ssvStatus.updateOne({address: node['address'] }, {status: res['status']}, (err, response) => { 
+                if(err) throw err 
+            })
+            alertNode(node['chatId'], res['status'], node['address'], node['name'] )
+            
+        }
     })
 }
