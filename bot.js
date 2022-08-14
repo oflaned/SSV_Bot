@@ -3,7 +3,6 @@ import dot from 'dotenv'
 import * as botCommands from './bot/commands.js'
 
 await dot.config()
-let token = process.env.BOT_TOKEN
 export const bot = await new TelegramApi(process.env.BOT_TOKEN, {polling:true})
 
 
@@ -13,18 +12,6 @@ export const start = () => {
         {
             command: '/start',
             description: 'start the bot'
-        },
-        {
-            command:'/add',
-            description: 'add node by address'
-        },
-        {
-            command: '/nodes',
-            description: 'list of nodes'
-        },
-        {
-            command: '/rm',
-            description: 'delete node'
         }
     ])
 
@@ -34,33 +21,53 @@ export const start = () => {
         text = text.toLocaleLowerCase()
         const curentChatId = msg.chat.id
 
-
-        if ( text === '/start' ) { 
-            bot.sendMessage(curentChatId, `Hi, @${msg.chat.username}\n\n Here you can add your ssv node to track status\n by command <code>/add addressOfNode</code>`, {parse_mode:'HTML'}) 
+        if (text === '/start') {
+            return botCommands.start(curentChatId, msg.chat.username)
         }
 
-        if ( text.startsWith('/add') ) {
-            botCommands.add(curentChatId, text)
+        if (text.length === 64) {
+            return botCommands.add(curentChatId, '/add ' + text )
         }
 
-        if ( text.startsWith('/nodes') ) {
-            botCommands.nodes(curentChatId, text)
-        }
+    })
 
-        if ( text.startsWith('/rm') ) {
-            botCommands.rm(curentChatId, text)
+    bot.on('callback_query', msg => {
+        if (msg.data === '/nodes') {
+            return botCommands.nodes(msg.message.chat.id, '/nodes')
         }
-
+        if (msg.data.startsWith('/add')){
+            return botCommands.add(msg.message.chat.id, '/add')
+        }
+        if (msg.data === '/rm'){
+            return botCommands.rm(msg.message.chat.id, '/rm')
+        }
+        if(msg.data.startsWith('/rm !')){
+            return botCommands.rm(msg.message.chat.id, msg.data)
+        }
+        if(msg.data === '/HowToFindAddress'){
+            return bot.sendPhoto(
+                msg.message.chat.id, 
+                './pictures/Address.png',
+                {caption: 'Firstly you need open: https://explorer.ssv.network/\nThen paste name of operator into search bar\nAnd After that copy address and paste it here'}
+            )
+        }
     })
 }
 
 export function alertNode(chatIds, status, address, name){
-    console.log(`msg to ${chatIds}`)
-    console.log(name)
     chatIds.forEach(id => {
-        if (status === 'Active')
-            bot.sendMessage(id, `<b>Status of ${name} node: </b> <code>${address}</code> <b>    is ${status}</b>\u2705`, {parse_mode:'HTML'})
+        if (status === 'Active') {
+            bot.sendMessage(
+                id, 
+                `<b>Status of ${name} node: </b> <code>${address}</code> <b>    is ${status}</b>\u2705`, 
+                {parse_mode:'HTML'}
+            )
+        }
         else
-            bot.sendMessage(id, `<b>Status of ${name} node: </b> <code>${address}</code> <b>    is ${status}</b>\u274c`, {parse_mode:'HTML'})
-    });
+            bot.sendMessage(
+                id, 
+                `<b>Status of ${name} node: </b> <code>${address}</code> <b>    is ${status}</b>\u274c`, 
+                {parse_mode:'HTML'}
+            )
+    })
 }

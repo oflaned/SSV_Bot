@@ -47,11 +47,12 @@ export async function checkAllNodes() {
         console.log(`Status of ${node['address']} node is ${res['status']}`)
     
         if (node['status'] !== res['status']) { 
-            ssvStatus.updateOne({address: node['address'] }, {status: res['status']}, (err, response) => { 
-                if(err) throw err 
-            })
-            alertNode(node['chatId'], res['status'], node['address'], node['name'] )
-            
+            ssvStatus.updateOne(
+                {address: node['address'] }, 
+                {status: res['status']}, 
+                (err, response) => { if(err) throw err }
+            )
+            alertNode(node['chatId'], res['status'], node['address'], node['name'])
         }
     })
 }
