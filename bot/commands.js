@@ -22,28 +22,20 @@ export const add = (curentChatId, text) => {
     if (text === '/add') { 
         return bot.sendMessage(
             curentChatId,
-            message.writeAddress, 
-            {parse_mode:'HTML', reply_markup: menu.helpAddress}
+            message.writeId, 
+            {parse_mode:'HTML', reply_markup: menu.helpId}
         )
     }
 
     if (text.startsWith('/add ')){
-        let addressFromMessage = text.replace('/add ','')
+        let idFromMessage = text.replace('/add ','')
 
-        if(addressFromMessage.length !== 64) { 
-            return bot.sendMessage(
-                curentChatId, 
-                message.wrongAddress, 
-                {parse_mode:'HTML'}
-            )
-        }
-
-        sendRequest(process.env.SSV_URL+addressFromMessage).then(res => {
-            ssvStatus.findOne({address: addressFromMessage}).then(response => {
+        sendRequest(process.env.SSV_URL+idFromMessage).then(res => {
+            ssvStatus.findOne({id: idFromMessage}).then(response => {
                 if (response === null) {
                     ssvStatus.create({
                         chatId:  curentChatId, 
-                        address: addressFromMessage, 
+                        id:      idFromMessage, 
                         name:    res['name'] }, 
                         (err, res) => { if(err) throw err }
                     )
@@ -65,7 +57,7 @@ export const add = (curentChatId, text) => {
                 let newChaitIdArray = response.chatId
                 newChaitIdArray.push(curentChatId)
                 ssvStatus.findOneAndUpdate(
-                    {address: addressFromMessage},
+                    {id: idFromMessage},
                     {chatId:  newChaitIdArray }, 
                     (err, res) => { if(err) throw err }
                 )
@@ -75,18 +67,19 @@ export const add = (curentChatId, text) => {
                     {parse_mode:'HTML', reply_markup: menu.main}
                 )
             })
-        }).catch(err => { return bot.sendMessage(curentChatId, message.wrongAddress), {parse_mode:'HTML'} })
+        }).catch(err => { return bot.sendMessage(curentChatId, message.wrongId), {parse_mode:'HTML'} })
     }
 }
 
 export const nodes = (curentChatId) => {
     ssvStatus.find({chatId: curentChatId}, (err, nodes) => {
+        console.log(nodes)
         var str = ``
         for(let i = 0; i < nodes.length; i++){
             if(nodes[i]['status'] === 'Active') {
-                str += `<b>${nodes[i]['name']}:</b> <code>${nodes[i]['address']}</code>   <b>${nodes[i]['status']}</b>\u2705\n\n`
+                str += `<b>${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u2705\n\n`
             } else { 
-                str += `<b>${nodes[i]['name']}:</b> <code>${nodes[i]['address']}</code>   <b>${nodes[i]['status']}</b>\u274c\n\n` 
+                str += `<b>${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u274c\n\n` 
             }
         }
         if(str === ``) {
@@ -108,6 +101,13 @@ export const rm = async (curentChatId, text) => {
     if (text === '/rm') {
         let nodes = []
         let dbNodes = await ssvStatus.find({chatId: curentChatId})
+        if (dbNodes.length === 0) {
+            return bot.sendMessage(
+                curentChatId, 
+                `You dont have any added node`, 
+                {parse_mode:'HTML', reply_markup: menu.main}
+            )
+        }
         for (let i = 0; i < dbNodes.length; i++){
             let text = `🗑remove ${dbNodes[i].name}`
             let rem = `/rm !${dbNodes[i].name}`
@@ -125,7 +125,7 @@ export const rm = async (curentChatId, text) => {
     if(text.startsWith('/rm !')){
         let nameOfNode = text.replace('/rm !','')
         let node = await ssvStatus.find({name: nameOfNode})
-        if (node[0].address === undefined) { return }
+        if (node[0].id === undefined) { return }
 
         let newChaitIdArray = node[0].chatId
         if (newChaitIdArray.indexOf(curentChatId) === -1) { return }

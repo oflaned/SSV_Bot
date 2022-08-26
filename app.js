@@ -1,8 +1,7 @@
 import { checkAllNodes } from './check.js'
 import mongoose from 'mongoose'
 import dot from 'dotenv'
-import { start } from './bot.js'
-import { refreshName } from './dbCommands/refreshName.js'
+import { alertUpdate, start } from './bot.js'
 
 dot.config()
 var time = Date.now()
@@ -16,9 +15,9 @@ await mongoose.connect(process.env.DB_URL, {
 console.log(`Time to connect with DB: ${(Date.now() - time)/1000} sec.`)
 
 start()
-
+alertUpdate()
 try{
-    setInterval(checkAllNodes, 30000)
+    setInterval(checkAllNodes, 4000)
 } catch(err){
     console.error(err.msg)
 }

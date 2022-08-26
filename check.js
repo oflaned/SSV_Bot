@@ -29,7 +29,7 @@ export async function checkAllNodes() {
 
     
     db.forEach(async node => {
-        let currentURL = process.env.SSV_URL + node['address']
+        let currentURL = process.env.SSV_URL + node['id']
         let res
         try{
             res = await fetch(currentURL)
@@ -44,15 +44,15 @@ export async function checkAllNodes() {
             return err
         }
 
-        console.log(`Status of ${node['address']} node is ${res['status']}`)
+        console.log(`Status of ${node['id']} node is ${res['status']}`)
     
         if (node['status'] !== res['status']) { 
             ssvStatus.updateOne(
-                {address: node['address'] }, 
+                {id: node['id'] }, 
                 {status: res['status']}, 
                 (err, response) => { if(err) throw err }
             )
-            alertNode(node['chatId'], res['status'], node['address'], node['name'])
+            alertNode(node['chatId'], res['status'], node['name'])
         }
     })
 }

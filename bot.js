@@ -24,9 +24,8 @@ export const start = () => {
         if (text === '/start') {
             return botCommands.start(curentChatId, msg.chat.username)
         }
-
-        if (text.length === 64) {
-            return botCommands.add(curentChatId, '/add ' + text )
+        if (text.startsWith('/add')) {
+            return botCommands.add(curentChatId, text)
         }
 
     })
@@ -48,26 +47,47 @@ export const start = () => {
             return bot.sendPhoto(
                 msg.message.chat.id, 
                 './pictures/Address.png',
-                {caption: 'Firstly you need open: https://explorer.ssv.network/\nThen paste name of operator into search bar\nAnd After that copy address and paste it here'}
+                {caption: 'Firstly you need open: https://explorer.ssv.network/\nThen paste name of operator into search bar\nAnd After that copy id and paste it here after /add'}
             )
         }
     })
 }
 
-export function alertNode(chatIds, status, address, name){
+export function alertNode(chatIds, status, name){
     chatIds.forEach(id => {
         if (status === 'Active') {
             bot.sendMessage(
                 id, 
-                `<b>Status of ${name} node: </b> <code>${address}</code> <b>    is ${status}</b>\u2705`, 
+                `<b>Status of ${name} node is ${status}</b>\u2705`, 
                 {parse_mode:'HTML'}
             )
         }
         else
             bot.sendMessage(
                 id, 
-                `<b>Status of ${name} node: </b> <code>${address}</code> <b>    is ${status}</b>\u274c`, 
+                `<b>Status of ${name} node: is ${status}</b>\u274c`, 
                 {parse_mode:'HTML'}
             )
+    })
+}
+
+export function alertUpdate() {
+    let ids = [
+        '703743978',  '417194626',  '416646558',
+        '603122970',  '700688372',  '5201951089',
+        '1849448384', '1605819557', '5061122895',
+        '5352629829', '402363340',  '5297217755',
+        '1384145708', '409831755',  '1913943',
+        '5424190480', '540690418',  '418543388',
+        '6722095',    '309573569',  '2093898765',
+        '5038085326', '1879436489', '5062397121',
+        '509326639',  '374242025',  '270156696'
+    ]
+    ids.forEach(id => {
+        bot.sendMessage(
+            id,
+            `<b>Bot was updated to the Shifu Testnet\n\n You need to add your node again</b>\u2705`, 
+            {parse_mode:'HTML'}
+        )
     })
 }

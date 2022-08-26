@@ -6,9 +6,9 @@ export const menu = {
             [{text: '🗑Remove node', callback_data: '/rm'}]
         ]
     }),
-    helpAddress: JSON.stringify({
+    helpId: JSON.stringify({
         inline_keyboard: [
-            [{text: '🆘How to find address', callback_data: '/HowToFindAddress'}]
+            [{text: '🆘How to find id', callback_data: '/HowToFindAddress'}]
         ]
     })
 }
