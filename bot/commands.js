@@ -1,9 +1,11 @@
-import { ssvStatus } from './../models/ssvStatus.js'
-import { bot } from './../bot.js'
 import dot from 'dotenv'
+
+import { ssvFaucet, ssvStatus } from './../models/ssvStatus.js'
+import { bot } from './../bot.js'
 import { sendRequest } from './../check.js'
 import * as message from './messages.js'
 import { menu } from './bottoms.js'
+import { balance } from '../checkFaucet.js'
 
 
 dot.config()
@@ -23,7 +25,7 @@ export const add = (curentChatId, text) => {
         return bot.sendMessage(
             curentChatId,
             message.writeId, 
-            {parse_mode:'HTML', reply_markup: menu.helpId}
+            {parse_mode:'HTML', reply_markup:  menu.helpAndMenu}
         )
     }
 
@@ -42,7 +44,7 @@ export const add = (curentChatId, text) => {
                     return bot.sendMessage(
                         curentChatId,
                         message.nodeAdded, 
-                        {parse_mode:'HTML', reply_markup: menu.main}
+                        {parse_mode:'HTML', reply_markup: menu.goMain}
                     )
                 }
 
@@ -50,15 +52,15 @@ export const add = (curentChatId, text) => {
                     return bot.sendMessage(
                         curentChatId,
                         message.alreadyAdded, 
-                        {parse_mode:'HTML', reply_markup: menu.main}
+                        {parse_mode:'HTML', reply_markup: menu.goMain}
                     )
                 } 
 
-                let newChaitIdArray = response.chatId
-                newChaitIdArray.push(curentChatId)
+                let newChatIdArray = response.chatId
+                newChatIdArray.push(curentChatId)
                 ssvStatus.findOneAndUpdate(
                     {id: idFromMessage},
-                    {chatId:  newChaitIdArray }, 
+                    {chatId:  newChatIdArray }, 
                     (err, res) => { if(err) throw err }
                 )
                 return bot.sendMessage(
@@ -73,26 +75,25 @@ export const add = (curentChatId, text) => {
 
 export const nodes = (curentChatId) => {
     ssvStatus.find({chatId: curentChatId}, (err, nodes) => {
-        console.log(nodes)
-        var str = ``
-        for(let i = 0; i < nodes.length; i++){
-            if(nodes[i]['status'] === 'Active') {
-                str += `<b>${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u2705\n\n`
-            } else { 
-                str += `<b>${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u274c\n\n` 
-            }
-        }
-        if(str === ``) {
+        if ( nodes.length === 0 ) {
             return bot.sendMessage(
                 curentChatId, 
                 message.noNodes, 
-                {parse_mode:'HTML', reply_markup: menu.main}
+                {parse_mode:'HTML', reply_markup: menu.addMain}
             )
+        }
+        var str = `Status of your nodes:\n\n`
+        for(let i = 0; i < nodes.length; i++){
+            if(nodes[i]['status'] === 'Active') {
+                str += `    <b>id: ${nodes[i]['id']} | ${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u2705\n\n`
+            } else { 
+                str += `    <b>id: ${nodes[i]['id']} | ${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u274c\n\n` 
+            }
         }
         return bot.sendMessage(
             curentChatId, 
             str, 
-            {parse_mode:'HTML', reply_markup: menu.main}
+            {parse_mode:'HTML', reply_markup: menu.addRmMain}
         )
     })
 }
@@ -105,7 +106,7 @@ export const rm = async (curentChatId, text) => {
             return bot.sendMessage(
                 curentChatId, 
                 `You dont have any added node`, 
-                {parse_mode:'HTML', reply_markup: menu.main}
+                {parse_mode:'HTML', reply_markup: menu.goMain}
             )
         }
         for (let i = 0; i < dbNodes.length; i++){
@@ -140,7 +141,7 @@ export const rm = async (curentChatId, text) => {
         return bot.sendMessage(
             curentChatId, 
             message.nodeDeleted, 
-            {parse_mode:'HTML', reply_markup: menu.main}
+            {parse_mode:'HTML', reply_markup: menu.goMain}
         )
     }
 }
@@ -150,5 +151,72 @@ export const helpWithAddr = (chatId) => {
         chatId, 
         './pictures/Address.png'
     )
+}
+
+export const disableNotification = async(chatId) => {
+    ssvFaucet.findOneAndUpdate({id: chatId}, {ping: false})
+    .then(() => faucetMenu(chatId))
+    .catch(err => {console.error(err)})
+}
+
+export const enableNotification = async(chatId) => {
+    ssvFaucet.findOneAndUpdate({id: chatId}, {ping: true})
+    .then(() => faucetMenu(chatId))
+    .catch(err => {console.error(err)})
+}
+
+export const faucetMenu = async (chatId) => {
+    let id = await ssvFaucet.find({id: chatId})
+    let str =``
+    if( balance > 32) {
+        str += `SSV Testnet Goerli Bot: \n \nFaucet Balance: ${balance.toFixed(4)} GoerliEth (Active)\n`
+    }
+    else {
+        str += `SSV Testnet Goerli Bot: \n \nFaucet Balance: ${balance.toFixed(4)} GoerliEth (Inactive)\n`
+    }
+    let notification = [[{text: '🔙Menu', callback_data: '/start'}]]
+
+    if (id.length === 0) {
+        ssvFaucet.create(
+            {id: chatId}, 
+            (err, res) => { if(err) throw err }
+        )
+        str += `Notification: <b>disable</b>❌`
+        let text = `Enable Notification✅`
+        let callback = `/enableNotification`
+        notification.push([{text: text, callback_data: callback}])
+        
+        let notification_keyboard = {
+            inline_keyboard: notification
+        }
+        return bot.sendMessage(
+            chatId,
+            str,
+            {parse_mode:'HTML', reply_markup: notification_keyboard}
+        )
+    }
+
+    if (id.length !== 0) {
+        if (id[0].ping === true) {
+            str += `Notification: <b>enable</b>✅`
+            let text = `Disable Notification❌`
+            let callback = `/disableNotification`
+            notification.push([{text: text, callback_data: callback}])
+        }
+        else {
+            str += `Notification: <b>disable</b>❌`
+            let text = `Enable Notification✅`
+            let callback = `/enableNotification`
+            notification.push([{text: text, callback_data: callback}])
+        }
+        let notification_keyboard = {
+            inline_keyboard: notification
+        }
+        return bot.sendMessage(
+            chatId,
+            str,
+            {parse_mode:'HTML', reply_markup: notification_keyboard}
+        )
+    }
 }
 

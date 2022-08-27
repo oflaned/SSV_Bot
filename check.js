@@ -1,6 +1,7 @@
+import fetch from 'node-fetch'
+
 import { ssvStatus } from './models/ssvStatus.js'
 import { alertNode } from './bot.js'
-import fetch from 'node-fetch'
 
 
 export function sendRequest(url) {

@@ -1,5 +1,7 @@
-import { ssvStatus } from './../models/ssvStatus.js'
 import fetch from 'node-fetch'
+
+import { ssvStatus } from './../models/ssvStatus.js'
+
 
 export const refreshName = async () => {
     let db
