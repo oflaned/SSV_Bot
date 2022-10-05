@@ -29,7 +29,7 @@ export const getBalanceFaucet = async () => {
             }
             return
         } else {
-            throw 'Error while get data from ssv API-Goerli'
+            throw 'Error while get data from API-Goerli'
         }
     } catch (err) {
         console.error(err)

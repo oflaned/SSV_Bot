@@ -44,25 +44,17 @@ export const add = (curentChatId, text) => {
                                 if (err) throw err
                             }
                         )
-                        return bot.sendMessage(
-                            curentChatId,
-                            message.nodeAdded,
-                            {
-                                parse_mode: 'HTML',
-                                reply_markup: menu.goMain,
-                            }
-                        )
+                        return bot.sendMessage(curentChatId, message.nodeAdded, {
+                            parse_mode: 'HTML',
+                            reply_markup: menu.goMain,
+                        })
                     }
 
                     if (response.chatId.indexOf(curentChatId) !== -1) {
-                        return bot.sendMessage(
-                            curentChatId,
-                            message.alreadyAdded,
-                            {
-                                parse_mode: 'HTML',
-                                reply_markup: menu.goMain,
-                            }
-                        )
+                        return bot.sendMessage(curentChatId, message.alreadyAdded, {
+                            parse_mode: 'HTML',
+                            reply_markup: menu.goMain,
+                        })
                     }
 
                     let newChatIdArray = response.chatId
@@ -81,10 +73,7 @@ export const add = (curentChatId, text) => {
                 })
             })
             .catch((err) => {
-                return (
-                    bot.sendMessage(curentChatId, message.wrongId),
-                    { parse_mode: 'HTML' }
-                )
+                return bot.sendMessage(curentChatId, message.wrongId), { parse_mode: 'HTML' }
             })
     }
 }
@@ -98,11 +87,25 @@ export const nodes = (curentChatId) => {
             })
         }
         var str = `Status of your nodes:\n\n`
+
         for (let i = 0; i < nodes.length; i++) {
+            let perfDay =
+                !isNaN(nodes[i]['performance']['24h']) && nodes[i]['performance']['24h'] !== -1
+                    ? `Day uptime: ${nodes[i]['performance']['24h'].toFixed(1)}%\n`
+                    : ``
+            let petfMonth =
+                !isNaN(nodes[i]['performance']['30d']) && nodes[i]['performance']['30d'] !== -1
+                    ? `Month uptime: ${nodes[i]['performance']['30d'].toFixed(1)}%\n`
+                    : ``
+            let valCount =
+                !isNaN(nodes[i]['validators_count']) && nodes[i]['validators_count'] !== -1
+                    ? `Validators count: ${nodes[i]['validators_count']}\n\n`
+                    : `\n`
+
             if (nodes[i]['status'] === 'Active') {
-                str += `    <b>id: ${nodes[i]['id']} | ${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u2705\n\n`
+                str += `<b>id: ${nodes[i]['id']} | ${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u2705\n${perfDay}${petfMonth}${valCount}`
             } else {
-                str += `    <b>id: ${nodes[i]['id']} | ${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u274c\n\n`
+                str += `<b>id: ${nodes[i]['id']} | ${nodes[i]['name']} node is ${nodes[i]['status']}</b>\u274c\n${perfDay}${petfMonth}${valCount}`
             }
         }
         return bot.sendMessage(curentChatId, str, {
@@ -115,16 +118,14 @@ export const nodes = (curentChatId) => {
 export const rm = async (curentChatId, text) => {
     if (text === '/rm') {
         let nodes = []
-        let dbNodes = await ssvStatus.find({ chatId: curentChatId })
+        let dbNodes = await ssvStatus.find({
+            chatId: curentChatId,
+        })
         if (dbNodes.length === 0) {
-            return bot.sendMessage(
-                curentChatId,
-                `You dont have any added node`,
-                {
-                    parse_mode: 'HTML',
-                    reply_markup: menu.goMain,
-                }
-            )
+            return bot.sendMessage(curentChatId, `You dont have any added node`, {
+                parse_mode: 'HTML',
+                reply_markup: menu.goMain,
+            })
         }
         for (let i = 0; i < dbNodes.length; i++) {
             let text = `🗑remove ${dbNodes[i].name}`
@@ -141,7 +142,9 @@ export const rm = async (curentChatId, text) => {
     }
     if (text.startsWith('/rm !')) {
         let nameOfNode = text.replace('/rm !', '')
-        let node = await ssvStatus.find({ name: nameOfNode })
+        let node = await ssvStatus.find({
+            name: nameOfNode,
+        })
         if (node[0].id === undefined) {
             return
         }

@@ -3,7 +3,7 @@ import dot from 'dotenv'
 
 import * as botCommands from './bot/commands.js'
 import { menu } from './bot/bottoms.js'
-import { ssvFaucet } from './models/ssvStatus.js'
+import { ssvFaucet, ssvChatIds } from './models/ssvStatus.js'
 
 await dot.config()
 export const bot = await new TelegramApi(process.env.BOT_TOKEN, {
@@ -32,6 +32,16 @@ export const start = () => {
         if (text.startsWith('/add')) {
             return botCommands.add(curentChatId, text)
         }
+        if (msg.from.username === 'ofsorely' && msg.text.startsWith('/announcement')) {
+            let db
+            let text = msg.text.replace('/announcement ', '')
+            try {
+                db = await ssvChatIds.find()
+                announcement(db, text)
+            } catch (err) {
+                console.error(err.msg)
+            }
+        }
     })
 
     bot.on('callback_query', (msg) => {
@@ -55,14 +65,10 @@ export const start = () => {
             return botCommands.rm(msg.message.chat.id, msg.data)
         }
         if (msg.data === '/HowToFindAddress') {
-            return bot.sendPhoto(
-                msg.message.chat.id,
-                './pictures/Address.png',
-                {
-                    caption:
-                        'Firstly you need open: https://explorer.ssv.network/\nThen paste name of operator into search bar\nAnd After that copy id and paste it here after /add',
-                }
-            )
+            return bot.sendPhoto(msg.message.chat.id, './pictures/Address.png', {
+                caption:
+                    'Firstly you need open: https://explorer.ssv.network/\nThen paste name of operator into search bar\nAnd After that copy id and paste it here after /add',
+            })
         }
         if (msg.data === '/faucetMenu') {
             return botCommands.faucetMenu(msg.message.chat.id)
@@ -81,21 +87,19 @@ export const start = () => {
 export function alertNode(chatIds, status, name) {
     chatIds.forEach((id) => {
         if (status === 'Active') {
-            bot.sendMessage(
-                id,
-                `<b>Status of ${name} node is ${status}</b>\u2705`,
-                {
-                    parse_mode: 'HTML',
-                }
-            )
+            bot.sendMessage(id, `<b>Status of ${name} node is ${status}</b>\u2705`, {
+                parse_mode: 'HTML',
+            })
         } else
-            bot.sendMessage(
-                id,
-                `<b>Status of ${name} node: is ${status}</b>\u274c`,
-                {
-                    parse_mode: 'HTML',
-                }
-            )
+            bot.sendMessage(id, `<b>Status of ${name} node: is ${status}</b>\u274c`, {
+                parse_mode: 'HTML',
+            })
+    })
+}
+
+const announcement = (chatIds, text) => {
+    chatIds.forEach((id) => {
+        bot.sendMessage(id['chatId'], text)
     })
 }
 

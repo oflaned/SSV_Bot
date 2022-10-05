@@ -4,7 +4,7 @@ export const menu = {
             [{ text: '📄Add node', callback_data: '/add' }],
             [{ text: '🗂Nodes list', callback_data: '/nodes' }],
             [{ text: '🗑Remove node', callback_data: '/rm' }],
-            [{ text: '🤖Faucet bot (testing)', callback_data: '/faucetMenu' }],
+            [{ text: '🤖Faucet bot', callback_data: '/faucetMenu' }],
         ],
     }),
     helpAndMenu: JSON.stringify({
